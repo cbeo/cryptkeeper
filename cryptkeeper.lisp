@@ -53,7 +53,7 @@
 (defparameter +port+ 6667)
 (defparameter +log+ "cryptkeeper-log.txt")
 
-(defparameter +joinlist+ '("#cryptkeeper-test"))
+(defparameter +joinlist+ '("#top-100-horror-challenge"))
 
 (defparameter +data-store+ #P"./cryptkeeper-datastore/")
 
@@ -197,9 +197,9 @@
   )
 
 (defun confused-cryptkeeper (&optional err)
-  (if err
-      (format nil "AAAAAHHHHHHHh! Either my eyeballs have finally fallen out or else ~s" err)
-      "I'm a ghoul not a fool!"))
+  (list  (if err
+             (format nil "AAAAAHHHHHHHh! Either my eyeballs have finally fallen out or else ~s" err)
+             "I'm a ghoul not a fool!")))
 
 (defun front (n list)
   (when (< n (length list)) (subseq list 0 n)))
