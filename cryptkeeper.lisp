@@ -1,7 +1,5 @@
 ;;;; cryptkeeper.lisp
 
-
-
 (defpackage #:cryptkeeper 
   (:use #:cl)
   (:local-nicknames (#:irc #:trivial-irc))
@@ -177,8 +175,9 @@
   (with-slots (title year) m
     (let* ((reviews (reviews-for-movie m))
            (average-rating
-             (/ (reduce #'+ reviews :key #'review-rating  :initial-value 0)
-                (length reviews))))
+             (if (zerop (length  reviews)) 0 
+                 (/ (reduce #'+ reviews :key #'review-rating  :initial-value 0)
+                    (length reviews)))))
       (format nil "~30a  (~a) ~a stars" title year average-rating))))
 
 

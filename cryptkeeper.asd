@@ -6,5 +6,5 @@
   :license  "Specify license here"
   :version "0.0.1"
   :serial t
-  :depends-on (#:trivial-irc #:alexandria #:trivia #:bknr.datastore)
+  :depends-on (#:trivial-irc #:alexandria  #:bknr.datastore)
   :components ((:file "cryptkeeper")))
