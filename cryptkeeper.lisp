@@ -172,13 +172,15 @@
      "Naughty Naughty. You can't edit that.")))
 
 (defun present-movie (m)
-  (with-slots (title year) m
+  (with-slots (title year link) m
     (let* ((reviews (reviews-for-movie m))
            (average-rating
              (if (zerop (length  reviews)) 0 
                  (/ (reduce #'+ reviews :key #'review-rating  :initial-value 0)
                     (length reviews)))))
-      (format nil "~30a  (~a) ~a stars" title year average-rating))))
+      (format nil "~30a  (~a) ~a stars ~a"
+              title year average-rating
+              (if link link "")))))
 
 
 (defun get-watched-list (nick &key by)
