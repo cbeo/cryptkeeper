@@ -35,7 +35,9 @@
          :index-reader reviews-by-user)
    (movie :accessor review-movie
           :initarg :movie
-          :initform nil)
+          :initform nil
+          :index-type bknr.indices:hash-index
+          :index-reader reviews-for-movie)
    (rating :accessor review-rating
            :initarg :rating
            :initform 1)
@@ -171,18 +173,27 @@
        "Unless I faultered your review was altered! Mwahahaha!")
      "Naughty Naughty. You can't edit that.")))
 
+(defun present-movie (m)
+  (with-slots (title year) m
+    (let* ((reviews (reviews-for-movie m))
+           (average-rating
+             (/ (reduce #'+ reviews :key #'review-rating  :initial-value 0)
+                (length reviews))))
+      (format nil "~30a  (~a) ~a stars" title year average-rating))))
+
+
 (defun get-watched-list (nick &key by)
   (let ((user (if by by nick)))
     (list* (format nil "Movies watched by ~a include: " user)
            (loop :for rev :in (reviews-by-user user)
-                 :collect (movie-title (review-movie rev))))))
+                 :collect (present-movie (review-movie rev))))))
 
 (defun get-unwatched-list (nick &key by)
   (let* ((user (if by by nick)))
     (list* (format nil "~a is yet to watch: ~%" user)
            (loop :for mov :in (all-movies)
                  :unless (get-review user (movie-title mov))
-                   :collect (movie-title mov)))))
+                   :collect (present-movie mov)))))
 
 (defparameter +help-menu+
   '("COMMANDS:"
