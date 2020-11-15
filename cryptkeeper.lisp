@@ -178,8 +178,8 @@
              (if (zerop (length  reviews)) 0 
                  (/ (reduce #'+ reviews :key #'review-rating  :initial-value 0)
                     (length reviews)))))
-      (format nil "~30a  (~a) ~a stars ~a"
-              title year average-rating
+      (format nil "~a stars | ~a | ~a | ~a"
+              average-rating year title
               (if link link "")))))
 
 
