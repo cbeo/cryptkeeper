@@ -148,7 +148,7 @@
        (bknr.datastore:with-transaction ()
          (setf (movie-title movie) new))
        "Like a dog with the mange the movie's title underwent a change. Hahahaha!")
-     "How can you remane what ever was?")))
+     "How can you rename what never was?")))
 
 (defun edit-movie-op (&key title year link)
   (list 
@@ -199,10 +199,10 @@
 (defparameter +help-menu+
   '("COMMANDS:"
     "add movie :title <quoted string> [:year <number>] [:link <quoted url>]"
-    "add review :title <quoted string> :rating number [:comments <quoted string>]"
+    "add review :title <quoted string> :rating <number> [:comments <quoted string>]"
     "rename movie :old <quoted string> :new <quoted string>"
     "edit movie :title <quoted string> [:year <number>] [:link <quoted url>]"
-    "edit review :title <quoted string> :rating number [:comments <quoted string>]"
+    "edit review :title <quoted string> :rating <number> [:comments <quoted string>]"
     "unwatched [:by <quoted string>]"
     "watched [:by <quoted string>]"
     "help")
@@ -215,7 +215,6 @@
 
 (defun front (n list)
   (when (< n (length list)) (subseq list 0 n)))
-
 
 (defun process-command (sender tokens)
   (handler-case 
