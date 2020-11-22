@@ -102,8 +102,11 @@
     (dolist (m ms) (irc:send-privmsg *cryptkeeper* victim m))))
 
 
-(defun get-movie (title)
-  (movie-by-title title))
+(defun get-movie (title &key case-insensitive)
+  (if case-insensitive
+      (find-if (lambda (movie) (string-equal title (movie-title movie)))
+	       (all-movies))
+      (movie-by-title title)))
 
 (defun add-movie (&key title year link)
   (bknr.datastore:with-transaction () 
@@ -113,7 +116,7 @@
   (list 
    (cond ((null title)
           "It is vital that you give a :title Ha Ha Ha Haa.")
-         ((get-movie title)
+         ((get-movie title :case-insensitive t)
           "You should be in a padded cell, that title was already added well.")
          (t (add-movie :title title :year year :link link)
             "Its all pretty groovy, I've added that movie, Ha Ha Ha Haa."))))
@@ -133,17 +136,20 @@
           "It is vital that you give a :title Ha Ha Ha Haa.")
          ((null rating)
           "With no :rating you'll keep me waiting, Ha Ha ha ha.")
-         ((not (get-movie title))
+         ((not (get-movie title :case-insensitive t))
           "You must be a philosopher, reviewing something that doesn't exist. Ha ha Ha ha.")
          ((get-review nick title)
           "Voting twice isn't nice.")
          (t
-          (add-review nick :movie (get-movie title) :rating rating :comments comments)
+          (add-review nick
+		      :movie (get-movie title :case-insensitive t)
+		      :rating rating
+		      :comments comments)
           "Hating, baiting, or grating, I've added your rating. Hahahaha."))))
 
 (defun rename-movie-op (&key old new)
   (list 
-   (a:if-let (movie (and old new (get-movie old)))
+   (a:if-let (movie (and old new (get-movie old :case-insensitive t)))
      (progn
        (bknr.datastore:with-transaction ()
          (setf (movie-title movie) new))
@@ -152,7 +158,7 @@
 
 (defun edit-movie-op (&key title year link)
   (list 
-   (a:if-let (movie (get-movie title))
+   (a:if-let (movie (get-movie title :case-insensitive t))
      (progn
        (bknr.datastore:with-transaction ()
          (when year (setf (movie-year movie ) year))
@@ -189,12 +195,24 @@
            (loop :for rev :in (reviews-by-user user)
                  :collect (present-movie (review-movie rev))))))
 
+
 (defun get-unwatched-list (nick &key by)
   (let* ((user (if by by nick)))
     (list* (format nil "~a is yet to watch: ~%" user)
            (loop :for mov :in (all-movies)
                  :unless (get-review user (movie-title mov))
                    :collect (present-movie mov)))))
+
+(defun present-review (rev)
+  (with-slots (user rating highlights) rev
+    (format nil "~a stars | ~a --~a~%"
+	    rating highlights user)))
+
+(defun get-reviews (&key for)
+  (let ((movie (get-movie for :case-insensitive t)))
+    (list* (format nil "Reviews for '~a'~%" for)
+	   (mapcar #'present-review (reviews-for-movie movie)))))
+
 
 (defparameter +help-menu+
   '("COMMANDS:"
@@ -203,6 +221,7 @@
     "rename movie :old <quoted string> :new <quoted string>"
     "edit movie :title <quoted string> [:year <number>] [:link <quoted url>]"
     "edit review :title <quoted string> :rating <number> [:comments <quoted string>]"
+    "reviews :for <quoted string>"
     "unwatched [:by <quoted string>]"
     "watched [:by <quoted string>]"
     "help")
@@ -239,6 +258,9 @@
 
         ((equal 'watched (first tokens))
          (apply #'get-watched-list sender (cdr tokens)))
+
+	((equal 'reviews (first tokens))
+	 (apply #'get-reviews (cdr tokens)))
 
         ((equal 'help (first tokens))
          +help-menu+)
